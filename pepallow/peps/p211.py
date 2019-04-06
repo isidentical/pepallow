@@ -21,6 +21,8 @@ class PEP211Transformer(ast.NodeTransformer):
             and isinstance(node.iter, ast.BinOp)
             and isinstance(node.iter.op, ast.MatMult)
         ):
+            if len(node.target.elts) != 2:
+                raise ValueError("There is should be only 2 names to unpack.")
             a, b = node.target.elts
             return ast.For(
                 target=a,
