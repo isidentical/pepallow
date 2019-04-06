@@ -16,8 +16,18 @@ class PEP211Transformer(ast.NodeTransformer):
     """
 
     def visit_For(self, node):
-        if isinstance(node.iter, ast.BinOp) and isinstance(node.iter.op, ast.MatMult):
-            node.iter = ast.Call(
-                ast.Name("zip", ast.Load()), [node.iter.left, node.iter.right], []
+        if (
+            isinstance(node.target, ast.Tuple)
+            and isinstance(node.iter, ast.BinOp)
+            and isinstance(node.iter.op, ast.MatMult)
+        ):
+            a, b = node.target.elts
+            return ast.For(
+                target=a,
+                iter=node.iter.left,
+                body=[
+                    ast.For(target=b, iter=node.iter.right, body=node.body, orelse=[])
+                ],
+                orelse=node.orelse,
             )
         return node
